@@ -4,6 +4,7 @@ Created on Mon May 18 17:58:33 2020
 
 @author: qihus
 """
+## Git repo : https://github.com/HoussamSlk/FeedCleaner_Regex
 
 import pandas as pd
 import datetime
