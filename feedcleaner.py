@@ -10,7 +10,7 @@ import datetime
 import re
 
 #Reading the datafile and storing it in a variable
-feed = pd.read_csv("C:/Users/qihus/Downloads/out_2020.06.05 feed file 93.csv")
+feed = pd.read_csv("C:/Users/qihus/Downloads/out_2020.06.05 feed file 94.csv")
 DR_startups = pd.read_csv("C:/Users/qihus/Desktop/Duplicate_URL Project/companies_20_05_20_1589966891.csv")
 DR_investors = pd.read_csv('C:/Users/qihus/Desktop/my Notes/allinvestors 04062020.csv')
 ###############################################################################
@@ -421,11 +421,11 @@ def remove_duplicates(df):
     output = investor_name(output)
     ##before report # function to flag the (not funding) T/F 
     ## articles that are not funding ; hint use col U V 
-    #report = filling_report(output)
-    #report = filling_report(input_df,output)
+    report = filling_report(output)
+    report = filling_report(input_df,output)
     cleaned = remove_duplicates(output)
-    cleaned.to_csv("clean_out_2020.06.05 feed file 93.csv",index=False)
-    output.to_csv("out_out_2020.06.05 feed file 93.csv",index=False)
+    cleaned.to_csv("clean_out_2020.06.05 feed file 94.csv",index=False)
+    output.to_csv("out_out_2020.06.05 feed file 94.csv",index=False)
     #run remove duplication here 
     #save result here , have two files 
 
