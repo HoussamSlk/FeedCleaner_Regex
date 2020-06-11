@@ -8,9 +8,10 @@ Created on Mon May 18 17:58:33 2020
 import pandas as pd
 import datetime
 import re
+from db_connector import *
 
 #Reading the datafile and storing it in a variable
-feed = pd.read_csv("C:/Users/qihus/Downloads/out_2020.06.05 feed file 94.csv")
+feed = pd.read_csv("C:/Users/qihus/Downloads/out_2020.06.11 feed file 97.csv")
 DR_startups = pd.read_csv("C:/Users/qihus/Desktop/Duplicate_URL Project/companies_20_05_20_1589966891.csv")
 DR_investors = pd.read_csv('C:/Users/qihus/Desktop/my Notes/allinvestors 04062020.csv')
 ###############################################################################
@@ -214,6 +215,11 @@ def round_type_by_amount(amount):
         if amount >= 10:
             return 'LATE VC'
 ###############################################################################
+def round_exists(startup_name,month,year,amount,currency):
+    #API function
+    return 0 
+    
+###############################################################################
 def filling_report(df):
     filesize = len(df)
     filled_startups = len(df[df.Out_name !=''])
@@ -403,10 +409,12 @@ def remove_duplicates(df):
     empty_fields = data.loc[(data.Out_name == '') | (data.Out_name.isna())]
     #to do : remove empty_fields from data
     data = data.drop_duplicates(subset=['Out_name', 'Out_currency','Out_amount'], keep='first')
-    #add the empty field back again run below line : 
+    #possible_dup = data[data.duplicated(subset=['Out_name'],keep=False)]
+    #possible_dup.to_csv("possible_dup.csv",index=False)
     data = data.append(empty_fields)
     data = data.drop_duplicates(subset ="ID", keep = 'first') 
     return data
+## add colomun with 'duplicates to check'
 ###############################################################################
 
 #NEW CODE INSIDE A FUNCTION
@@ -424,8 +432,8 @@ def remove_duplicates(df):
     report = filling_report(output)
     report = filling_report(input_df,output)
     cleaned = remove_duplicates(output)
-    cleaned.to_csv("clean_out_2020.06.05 feed file 94.csv",index=False)
-    output.to_csv("out_out_2020.06.05 feed file 94.csv",index=False)
+    cleaned.to_csv("clean_out_2020.06.11 feed file 97.csv",index=False)
+    output.to_csv("out_out_2020.06.11 feed file 97.csv",index=False)
     #run remove duplication here 
     #save result here , have two files 
 
