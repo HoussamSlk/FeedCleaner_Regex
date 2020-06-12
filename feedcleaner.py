@@ -11,7 +11,7 @@ import re
 from db_connector import *
 
 #Reading the datafile and storing it in a variable
-feed = pd.read_csv("C:/Users/qihus/Downloads/out_2020.06.11 feed file 97.csv")
+feed = pd.read_csv("C:/Users/qihus/Downloads/2020.06.12 feed file 98.csv")
 DR_startups = pd.read_csv("C:/Users/qihus/Desktop/Duplicate_URL Project/companies_20_05_20_1589966891.csv")
 DR_investors = pd.read_csv('C:/Users/qihus/Desktop/my Notes/allinvestors 04062020.csv')
 ###############################################################################
@@ -160,10 +160,11 @@ def amount_patterns(a_string):
         amount_M = amount/1000
         return amount_M
 ##############################################################################
-def round_type(a_string):
+def round_type(a_string,strict = True):
     acquisition = ['acquires', 'acquired', 'buys', 'bought', 'akquisitionen', 'übernimmt',\
                    'sväljer', 'köper', 'säljer', 'overname', 'neem', 'nam', 'overgenomen', \
                        'koopt', 'gekocht', 'verkoopt', 'verkocht','purchased']
+    not_round = ['charity']
     series_a = ['series a', 'Series A']
     series_b = ['series b', 'Series B']
     series_c = ['series c', 'Series C']
@@ -176,6 +177,9 @@ def round_type(a_string):
     ipo = ['IPO', 'public offering', 'to list', 'floats']
     grant = ['grant','Grant']
     seed = ['seed','SEED']
+    if strict == True:
+        if any(word in a_string for word in not_round):
+            return ''
     if any(word in a_string for word in acquisition):
         return 'ACQUISITION'
     if any(word in a_string for word in series_a):
@@ -202,13 +206,14 @@ def round_type(a_string):
         return 'GRANT'
     if any(word in a_string for word in seed):
         return 'SEED'
+    return ''
 ###############################################################################
 def round_type_by_amount(amount):
     if (type(amount) == str)and (amount == ''): #if amount if empty
-        return 'EARLY VC'
+        return ''
     else:
         amount = float(amount)
-        if (amount == 0)  or  ((amount >= 1)and (amount < 10)):
+        if ((amount >= 1)and (amount < 10)):
             return 'EARLY VC'
         if amount < 1:
             return 'SEED'
@@ -282,7 +287,7 @@ def company_name (df):
     
         data.loc[data.TITLE == title, 'Out_name'] = startup_name
         data.loc[data.TITLE == title, 'Out_url'] = startup_dr_url
-        if data.loc[data.TITLE == title, 'Out_name'].item() == '':
+        if data.loc[data.TITLE == title, 'Out_name'].item() == '' :
             startup_name_list = [word for word in DR_startups if word in title]
             startup_name_list = [x for x in startup_name_list if x not in skip_word ]
             if startup_name_list:
@@ -351,12 +356,11 @@ def get_round_type(df):
     for title in pbar(titles):
         title = str(title)
         content = str(data.loc[data.TITLE == title, 'CONTENT'].item())
-        roundtype = "EARLY VC"
-        if(round_type(title)):
-            roundtype = round_type(title)
+        roundtype = round_type(title) #content is for only two paraphs 
+        if(roundtype != ''):
             data.loc[data.TITLE == title, 'Out_RoundType'] = roundtype   
         elif(round_type(content)):
-            roundtype = round_type(content)
+            roundtype = round_type(content,strict = False)
             data.loc[data.TITLE == title, 'Out_RoundType'] = roundtype
         else:
             amount = data.loc[data.TITLE == title, 'Out_amount'].item()
@@ -432,8 +436,8 @@ def remove_duplicates(df):
     report = filling_report(output)
     report = filling_report(input_df,output)
     cleaned = remove_duplicates(output)
-    cleaned.to_csv("clean_out_2020.06.11 feed file 97.csv",index=False)
-    output.to_csv("out_out_2020.06.11 feed file 97.csv",index=False)
+    cleaned.to_csv("clean_2020.06.12 feed file 98.csv",index=False)
+    output.to_csv("out_2020.06.12 feed file 98.csv",index=False)
     #run remove duplication here 
     #save result here , have two files 
 

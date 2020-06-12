@@ -96,5 +96,70 @@ def get_companies_bulk(fields_string='id,name,website_url', must_dict={}, must_n
     return pd.DataFrame(items)
     
 
- 
+############################################################################################
+def get_company_funds(fields_string='name,path,fundings',keyword='alan',must_dict={}, must_not_dict={}):
+    """ Get data about companies in bulk with filtering and selection of returned fields
+    
+   
+    Parameters:
+   
+    fields_string (string): fields to be returned for data points (default: 'id,name,website_url' )
+    
+    must_dict (dict): inclusion filter for data points (default: {})
+    
+    must_not_dict (dict): exclusion filter for data points (default: {})
+    
+    
+    Returns: 
+    
+    Pandas DataFrame when data is available, False in case of error
+    
+    Example:
+        
+    my_df=get_companies_bulk('id,name,website_url,industries,investors', { 'hq_locations': ['Amsterdam'],'tags': ['banking']})    
+    if my_df == False:
+        print("error loading data")
 
+    """
+    
+    
+    next_page_id = ""
+    items = []
+    
+    while True:    
+       
+        data = {
+        "keyword": keyword,
+        "keyword_type":"name",
+        "keyword_match_type": "exact" ,
+        "form_data": {
+            "must":must_dict,
+            "must_not":must_not_dict
+            },
+        "fields": fields_string,
+        "next_page_id": next_page_id,
+        "limit": 100
+        }    
+        
+        headers = {
+            'Authorization': 'Basic MTExZGVhbHJvb21UZXN0aW5nfmVudjo=',
+            'Content-Type': 'application/json'
+            }
+        r = requests.post(url="https://api.dealroom.co/api/v1/companies/bulk", data=json.dumps(data), headers=headers)
+        res = json.loads(r.text)
+        #print(res) 
+        next_page_id = res['next_page_id']
+        
+        if 'error' in res.keys():
+            print("error code: ",res['code'])
+            print("error message: ",res['message'])
+            return False
+        
+        res=res['items'] 
+        items=items+res
+        if next_page_id == None:
+           break
+   
+
+
+    return pd.DataFrame(items)
