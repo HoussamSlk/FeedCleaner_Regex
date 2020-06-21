@@ -97,29 +97,12 @@ def get_companies_bulk(fields_string='id,name,website_url', must_dict={}, must_n
     
 
 ############################################################################################
-def get_company_funds(fields_string='name,path,fundings',keyword='alan',must_dict={}, must_not_dict={}):
+def get_company_funds(fields_string='name,path,fundings',keyword='',must_dict={}, must_not_dict={}):
     """ Get data about companies in bulk with filtering and selection of returned fields
     
    
     Parameters:
    
-    fields_string (string): fields to be returned for data points (default: 'id,name,website_url' )
-    
-    must_dict (dict): inclusion filter for data points (default: {})
-    
-    must_not_dict (dict): exclusion filter for data points (default: {})
-    
-    
-    Returns: 
-    
-    Pandas DataFrame when data is available, False in case of error
-    
-    Example:
-        
-    my_df=get_companies_bulk('id,name,website_url,industries,investors', { 'hq_locations': ['Amsterdam'],'tags': ['banking']})    
-    if my_df == False:
-        print("error loading data")
-
     """
     
     
@@ -155,11 +138,21 @@ def get_company_funds(fields_string='name,path,fundings',keyword='alan',must_dic
             print("error message: ",res['message'])
             return False
         
+        year,month,amount,currency,roundtype,investors =  [],[],[],[],[],[]
         res=res['items'] 
-        items=items+res
+        items = res
+        co_name = items[0]['name']
+        path = items[0]['path']
+        fundings = items[0]['fundings']['items']
+        for fund in fundings:
+            year.append(fund['year'])
+            month.append(fund['month'])
+            amount.append(fund['amount'])
+            currency.append(fund['currency'])
+            roundtype.append(fund['round'])
+            #investors.append(fund['investors']['name'])
         if next_page_id == None:
            break
-   
-
-
-    return pd.DataFrame(items)
+    df = pd.DataFrame([year,month,amount,currency,roundtype,investors]).T
+    df = df.rename(columns={0:'year',1:'month',2:'amount',3:'currency',4:'round',5:'investors'})
+    return df

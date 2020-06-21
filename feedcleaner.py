@@ -8,10 +8,11 @@ Created on Mon May 18 17:58:33 2020
 import pandas as pd
 import datetime
 import re
-from db_connector import *
+#from db_connector import *
+
 
 #Reading the datafile and storing it in a variable
-feed = pd.read_csv("C:/Users/qihus/Downloads/2020.06.12 feed file 98.csv")
+feed = pd.read_csv("C:/Users/qihus/Downloads/out_2020.06.19 feed file 103.csv")
 DR_startups = pd.read_csv("C:/Users/qihus/Desktop/Duplicate_URL Project/companies_20_05_20_1589966891.csv")
 DR_investors = pd.read_csv('C:/Users/qihus/Desktop/my Notes/allinvestors 04062020.csv')
 ###############################################################################
@@ -112,7 +113,7 @@ def amount_patterns(a_string):
         return amount_M
     if match_1:
         amount = match_1.group()
-        amount = int(amount[1:-1])
+        amount = float(amount[1:-1])
         amount_M = amount/1000
         return amount_M 
     if match_2:
@@ -129,7 +130,7 @@ def amount_patterns(a_string):
         return amount_M
     if match_5:
         amount = match_5.group()
-        amount = int(amount[:-5])
+        amount = float(amount[:-5])
         amount_M = amount / 1000000
         return amount_M
     if match_6:
@@ -156,7 +157,7 @@ def amount_patterns(a_string):
     if match_11:
         amount = match_11.group()
         amount.replace(" ", "")
-        amount = int(amount[:-2])
+        amount = float(amount[:-2])
         amount_M = amount/1000
         return amount_M
 ##############################################################################
@@ -223,7 +224,6 @@ def round_type_by_amount(amount):
 def round_exists(startup_name,month,year,amount,currency):
     #API function
     return 0 
-    
 ###############################################################################
 def filling_report(df):
     filesize = len(df)
@@ -235,6 +235,7 @@ def filling_report(df):
           .format(filled_startups/filesize*100,filled_startups))
     print('{0} % of investors were identified total of {1} rows'\
           .format(filled_investors/filesize*100,filled_investors))
+###############################################################################
 ###############################################################################        
 ###########DF Related functions################################################
 ###########functions that takes DF and returns a news DF with results #########
@@ -420,7 +421,34 @@ def remove_duplicates(df):
     return data
 ## add colomun with 'duplicates to check'
 ###############################################################################
-
+def new_startups_NER(df):
+    import spacy
+    import en_core_web_lg
+    nlp = en_core_web_lg.load()
+    import warnings
+    warnings.filterwarnings("ignore")
+    data = df 
+    no_name = df[df['Out_name'] == ""]
+    titles = list(no_name['TITLE'])
+    skip_word = ['Funding' , 'Collective' , 'Round' , 'Count' , 'Provider',\
+             'Amazon','Facebook','The', 'Engine', 'Data','Note', 'Young', \
+            'Healthcare','Foundation', 'New' ,'Now' , 'This', 'Million', 'Open' , \
+                'Teams','After' ,'Capital' , '39', '100' , '54' , 'Acquire', \
+                    'Air','Raise','Raises', 'Ceo','Company', 'Daily','Extra',\
+                        'Startup','Top','Up','Vc','With','Venture','Saas', \
+                            'Initial','Inc','United','rais','Parent','Takes',\
+                            'Artificial','Tv','Electric','Emerging','South','Run',\
+                                'Property','Clean','Tech','Ok','Special','Voice','Energy',\
+                                    'Facility','Gas','Virtual','Android','Jeff' , 'API']
+    pbar = ProgressBar()
+    for title in pbar(titles):
+        title_nlp= nlp(title)
+        for ent in title_nlp.ents:
+            if ((ent.label_=='ORG') and (ent.text not in skip_word)):
+                data.loc[data.TITLE == title, 'Out_name'] = ent.text
+                data.loc[data.TITLE == title, 'Out_isnew'] = 1
+    return data
+###############################################################################
 #NEW CODE INSIDE A FUNCTION
     #test function here : 
     
@@ -434,10 +462,11 @@ def remove_duplicates(df):
     ##before report # function to flag the (not funding) T/F 
     ## articles that are not funding ; hint use col U V 
     report = filling_report(output)
-    report = filling_report(input_df,output)
+    #test new function 
+    output = new_startups_NER(output)
     cleaned = remove_duplicates(output)
-    cleaned.to_csv("clean_2020.06.12 feed file 98.csv",index=False)
-    output.to_csv("out_2020.06.12 feed file 98.csv",index=False)
+    cleaned.to_csv("clean_out_2020.06.19 feed file 103.csv",index=False)
+    output.to_csv("out_out_2020.06.19 feed file 103+New.csv",index=False)
     #run remove duplication here 
     #save result here , have two files 
 
